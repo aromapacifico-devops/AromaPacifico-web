@@ -16,13 +16,15 @@ La consulta pública es una demostración local con datos ficticios. El desplieg
 
 ![Hero de AromaPacífico Web 2.0 en escritorio](public/screenshots/home-desktop.png)
 
-Captura auténtica de la exportación estática ejecutada localmente. También se versionan vistas de la [galería de arquitectura](public/screenshots/architecture-desktop.png) y del [hero móvil](public/screenshots/home-mobile.png) como evidencia visual responsive.
+Captura auténtica de la exportación estática ejecutada localmente. También se versionan evidencias del [hero con storytelling](public/screenshots/scroll-story-desktop.png), el [recorrido animado](public/screenshots/scroll-story-journey.png), las [métricas documentadas](public/screenshots/scroll-story-metrics.png) y el [hero móvil](public/screenshots/scroll-story-mobile.png).
 
 ## Características principales
 
 - Identidad oficial con Outfit, Roboto Mono y la paleta institucional.
-- Hero editorial con entrada progresiva y movimiento ambiental contenido.
-- Revelado por scroll mediante `IntersectionObserver`, ejecutado una sola vez.
+- Hero editorial con parallax progresivo, cambio de escala y transición hacia la siguiente sección.
+- Storytelling ligado al desplazamiento con variables CSS, un listener pasivo y `requestAnimationFrame`.
+- Revelado textual por frases, tarjetas apilables y recorrido SVG que avanza con el scroll.
+- Métricas de planificación documentadas, diferenciadas de cualquier dato operacional.
 - Recorrido visual finca → transporte → centro de acopio → puerto → comprador.
 - Tres experiencias claramente etiquetadas como prototipos de interfaz.
 - Consulta de saco con carga ilustrativa, validación y resultado ficticio.
@@ -43,7 +45,16 @@ Captura auténtica de la exportación estática ejecutada localmente. También s
 
 ## Animaciones e interacciones
 
-El movimiento utiliza CSS, transformaciones, opacidad e `IntersectionObserver`; no se añadió una dependencia de animación. Las entradas no se repiten, los efectos ambientales se desactivan con movimiento reducido o actualización lenta y el contenido permanece visible cuando JavaScript no está disponible.
+El movimiento utiliza CSS, transformaciones, opacidad, `IntersectionObserver` y un controlador de scroll nativo; no se añadió una dependencia de animación. Un único listener pasivo agrupa las lecturas en `requestAnimationFrame` y escribe variables CSS directamente, sin provocar renders React por cada cambio de desplazamiento.
+
+- El hero aplica parallax discreto al título, la ilustración y los elementos decorativos.
+- Las frases resaltan conceptos completos sin duplicar ni ocultar el texto accesible.
+- Los tres pilares se apilan con `position: sticky` en escritorio y vuelven al flujo normal en pantallas táctiles pequeñas.
+- El recorrido dibuja progresivamente una ruta SVG y activa sus cinco etapas.
+- Los diagramas combinan entrada progresiva con una transición contenida hacia el visor.
+- Las barras y contadores presentan solo valores de planificación trazables a la documentación.
+
+Las entradas no se repiten. `prefers-reduced-motion` y `update: slow` desactivan el movimiento complejo; el contenido mantiene su estado final y permanece visible cuando JavaScript no está disponible.
 
 ## Visor de diagramas
 
@@ -125,7 +136,7 @@ tests/project.test.mjs              Integridad, rutas y accesibilidad estática
 
 ## Arquitectura del frontend
 
-La página se renderiza principalmente como Server Component. Solo la navegación, el controlador de revelado, la demo y el visor usan estado de cliente. El contenido y los metadatos de diagramas viven en `src/content/site.ts`, por lo que las tarjetas, las rutas locales y los enlaces de procedencia comparten una única fuente.
+La página se renderiza principalmente como Server Component. Solo la navegación, el controlador de movimiento, la demo y el visor usan lógica de cliente. El controlador no almacena el progreso en estado React: actualiza propiedades CSS sobre los elementos implicados y mantiene el trabajo por frame acotado. El contenido, las métricas de diseño y los metadatos de diagramas viven en `src/content/site.ts`, por lo que las tarjetas, las rutas locales y los enlaces de procedencia comparten una única fuente.
 
 ## Fuente de los diagramas
 
