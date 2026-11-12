@@ -16,7 +16,7 @@ La consulta pública es una demostración local con datos ficticios. El desplieg
 
 ![Hero de AromaPacífico Web 2.0 en escritorio](public/screenshots/home-desktop.png)
 
-Captura auténtica de la exportación estática ejecutada localmente. También se versionan evidencias del [hero con storytelling](public/screenshots/scroll-story-desktop.png), el [recorrido animado](public/screenshots/scroll-story-journey.png), las [métricas documentadas](public/screenshots/scroll-story-metrics.png) y el [hero móvil](public/screenshots/scroll-story-mobile.png).
+Captura auténtica de la exportación estática ejecutada localmente. También se versionan cinco momentos reales del recorrido: [0 %](public/screenshots/journey-scroll-0.png), [25 %](public/screenshots/journey-scroll-25.png), [50 %](public/screenshots/journey-scroll-50.png), [75 %](public/screenshots/journey-scroll-75.png) y [100 %](public/screenshots/journey-scroll-100.png). El [vídeo de evidencia](public/evidence/journey-scroll.webm) recorre la escena completa en Chromium.
 
 ## Características principales
 
@@ -50,7 +50,8 @@ El movimiento utiliza CSS, transformaciones, opacidad, `IntersectionObserver` y 
 - El hero aplica parallax discreto al título, la ilustración y los elementos decorativos.
 - Las frases resaltan conceptos completos sin duplicar ni ocultar el texto accesible.
 - Los tres pilares se apilan con `position: sticky` en escritorio y vuelven al flujo normal en pantallas táctiles pequeñas.
-- El recorrido dibuja progresivamente una ruta SVG y activa sus cinco etapas.
+- El recorrido reserva cinco alturas de viewport en escritorio, mantiene una escena sticky y transiciona entre cinco etapas protagonistas.
+- La conexión horizontal se llena entre los centros de los nodos; en móvil se convierte en una narrativa vertical sin sticky.
 - Los diagramas combinan entrada progresiva con una transición contenida hacia el visor.
 - Las barras y contadores presentan solo valores de planificación trazables a la documentación.
 
@@ -105,6 +106,7 @@ Abre <http://localhost:3000>.
 | `npm run typecheck` | Verificación de TypeScript sin emitir archivos |
 | `npm run lint` | Reglas de ESLint y Next.js |
 | `npm run test` | Pruebas con Node Test Runner |
+| `npm run test:visual` | QA de integración con Playwright en cinco breakpoints |
 | `npm run build` | Compilación y exportación estática en `out/` |
 | `npm run start` | Servidor Next.js; no es necesario para el artefacto estático |
 
@@ -173,9 +175,18 @@ npm run build
 
 Las pruebas comprueban diagramas locales y sus firmas PNG, rutas y metadatos, navegación, declaración de datos ficticios, ausencia de llamadas a APIs, controles del visor, branding y movimiento reducido.
 
+Para el QA visual instala Chromium una vez y ejecuta:
+
+```bash
+npx playwright install chromium
+npm run test:visual
+```
+
+La suite visual comprueba cinco estados diferenciados del recorrido, etapa activa, transformaciones efectivas, geometría de las conexiones, ausencia de cruces con texto, overflow, breakpoints de 360 a 1440 px y movimiento reducido.
+
 ## CI/CD
 
-El workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) usa Node 22 y ejecuta `npm ci`, tests, lint, typecheck y build en pull requests y pushes a `main`. La presencia del workflow no implica por sí sola que un build remoto haya terminado correctamente; confirma el estado en [GitHub Actions](https://github.com/aromapacifico-devops/AromaPacifico-web/actions).
+El workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) usa Node 22 y ejecuta `npm ci`, pruebas estáticas, Chromium/Playwright, lint, typecheck y build en pull requests y pushes a `main`. La presencia del workflow no implica por sí sola que un build remoto haya terminado correctamente; confirma el estado en [GitHub Actions](https://github.com/aromapacifico-devops/AromaPacifico-web/actions).
 
 ## Despliegue estático o Vercel
 
