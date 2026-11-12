@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="680" viewBox="0 0 920 680" fill="none" role="img" aria-label="Ilustración de montañas y cultivos de café">
+  <defs>
+  <linearGradient id="sky" x1="430" y1="0" x2="430" y2="680" gradientUnits="userSpaceOnUse"><stop stop-color="#E8E5DB"/><stop offset=".48" stop-color="#F7E3B9"/><stop offset="1" stop-color="#E0B975"/></linearGradient>
+  <linearGradient id="hill" x1="0" y1="350" x2="0" y2="680" gradientUnits="userSpaceOnUse"><stop stop-color="#516E62"/><stop offset="1" stop-color="#193C34"/></linearGradient>
+  <linearGradient id="hill2" x1="200" y1="410" x2="750" y2="750" gradientUnits="userSpaceOnUse"><stop stop-color="#91A38B"/><stop offset="1" stop-color="#355D47"/></linearGradient>
+  <clipPath id="rect"><rect width="920" height="680" rx="22"/></clipPath></defs>
+  <g clip-path="url(#rect)"><path fill="url(#sky)" d="M0 0H920V680H0z"/><circle cx="657" cy="171" r="89" fill="#FAE6AE" opacity=".88"/><circle cx="657" cy="171" r="133" stroke="#FAE6AE" stroke-width="1" opacity=".4"/><path d="M0 362C119 295 183 310 288 368C400 231 504 242 598 363C725 280 827 286 920 348V680H0Z" fill="#B7BBA8"/><path d="M0 417C109 338 194 338 279 407C382 310 479 319 547 398C672 310 797 309 920 386V680H0Z" fill="#7E9B83"/><path d="M0 508C152 395 248 424 391 513C567 354 692 388 920 480V680H0Z" fill="url(#hill2)"/><path d="M0 585C140 480 248 478 397 561C578 460 722 460 920 572V680H0Z" fill="url(#hill)"/>
+  <path d="M-60 600C130 495 251 493 415 568M-40 634C133 530 262 531 442 605M-30 667C134 573 293 578 480 651M394 576C565 479 735 491 951 596M431 607C601 510 763 527 951 634M481 652C632 565 779 566 953 665" stroke="#B7C19A" stroke-width="3" stroke-linecap="round" opacity=".54"/>
+  <path d="M112 521l11-66m-17 21 17-21 18 22m-18-22-16-7m16 7 15-12M192 501l-6-70m-12 27 12-27 14 17m-14-17-15-9m15 9 16-14M757 532l10-76m-20 23 20-23 19 23m-19-23-15-10m15 10 17-12" stroke="#25483D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0 0H920V680H0V0Z" fill="url(#sky)" opacity=".04"/>
+  </g>
+</svg>

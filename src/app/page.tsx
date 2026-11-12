@@ -1,0 +1,58 @@
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Check, CircleDot, CloudOff, Coffee, Droplets, Eye, Leaf, MapPinned, RadioTower, Ship, Sprout, Truck, Warehouse, Waves, Wind } from "lucide-react";
+import { Header } from "@/components/header";
+import { Logo } from "@/components/logo";
+import { TraceDemo } from "@/components/trace-demo";
+import { journey, modules, site } from "@/content/site";
+
+const iconMap = { sprout: Sprout, truck: Truck, warehouse: Warehouse, ship: Ship };
+
+export default function HomePage() {
+  return (
+    <main id="inicio">
+      <Header />
+      <section className="hero">
+        <div className="hero-glow" aria-hidden="true" />
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <span className="eyebrow"><span className="eyebrow-dot"/> CAFÉ, TERRITORIO Y TECNOLOGÍA</span>
+            <h1>El origen<br/>que <em>nos</em><br/><span>conecta<span className="hero-period">.</span></span></h1>
+            <p className="hero-description">Una propuesta para contar la historia completa del café: desde la finca y su gente, hasta el último paso de su recorrido.</p>
+            <div className="hero-actions"><Link href="#plataforma" className="button button-primary">Conoce la propuesta <ArrowUpRight size={18}/></Link><Link href="#recorrido" className="button button-quiet">Descubre el recorrido <ArrowRight size={17}/></Link></div>
+            <div className="hero-footnote"><span className="hero-footnote-line"/><span>Proyecto académico de arquitectura · Piloto de referencia, no servicio desplegado</span></div>
+          </div>
+          <div className="hero-art" aria-label="Ilustración del paisaje cafetero y la trazabilidad">
+            <div className="hero-photo"><Image src="/illustrations/mountains.svg" alt="Ilustración de montañas cafeteras colombianas al amanecer" fill sizes="(max-width: 900px) 100vw, 50vw" priority /></div>
+            <div className="hero-image-scrim"/>
+            <div className="hero-photo-caption"><span><span className="photo-indicator"/> EL TERRITORIO</span><strong>Donde empieza<br/>cada historia</strong></div>
+            <div className="floating-data"><div className="floating-data-icon"><RadioTower size={21}/></div><div><span>MONITOREO</span><strong>La finca conectada</strong><small>Diseño con operación offline</small></div><span className="floating-status"/></div>
+            <div className="image-index">01 / AROMAPACÍFICO</div>
+          </div>
+        </div>
+        <div className="hero-side-note">COLOMBIA <span>—</span> 2026</div>
+      </section>
+      <section className="signal-strip" aria-label="Cadena de valor"><div className="container strip-inner"><span>DE LA TIERRA</span><span className="strip-symbol">✳</span><span>AL ACOPIO</span><span className="strip-symbol">✳</span><span>AL DESTINO</span><span className="strip-symbol">✳</span><span>CON UN MISMO ORIGEN</span></div></section>
+      <section id="plataforma" className="intro-section section-padding">
+        <div className="container">
+          <div className="intro-head"><span className="eyebrow eyebrow--dark"><span className="eyebrow-dot"/> UNA VISIÓN COMPARTIDA</span><div className="intro-grid"><h2>Tecnología que entiende <em>el territorio.</em></h2><div className="intro-right"><p>En el origen del café hay decisiones, personas y caminos que merecen ser visibles. AromaPacífico propone conectar el monitoreo del campo, la logística y la trazabilidad en un mismo sistema.</p><Link href={site.github} target="_blank" rel="noopener noreferrer" className="text-link">Explorar la arquitectura <ArrowUpRight size={17}/></Link></div></div></div>
+          <div className="value-grid">
+            <article className="value-card"><span className="value-card-number">01 — CAMPO</span><div className="value-icon value-icon--leaf"><Leaf size={27}/></div><h3>Escuchar el cultivo</h3><p>Registrar variables importantes del cultivo y el secado para apoyar mejores decisiones.</p><span className="value-bottom">MONITOREO Y ALERTAS <ArrowUpRight size={16}/></span></article>
+            <article className="value-card"><span className="value-card-number">02 — CAMINO</span><div className="value-icon value-icon--gold"><Truck size={28}/></div><h3>No perder el hilo</h3><p>Conservar la historia de los sacos a medida que pasan de una mano a otra.</p><span className="value-bottom">CADENA DE CUSTODIA <ArrowUpRight size={16}/></span></article>
+            <article className="value-card"><span className="value-card-number">03 — ORIGEN</span><div className="value-icon value-icon--blue"><Eye size={28}/></div><h3>Hacer visible el origen</h3><p>Acercar una historia verificable a quien compra, cuidando la privacidad de las personas.</p><span className="value-bottom">TRANSPARENCIA <ArrowUpRight size={16}/></span></article>
+          </div>
+        </div>
+      </section>
+      <section id="recorrido" className="journey-section section-padding"><div className="container"><div className="journey-heading"><div><span className="eyebrow eyebrow--dark"><span className="eyebrow-dot"/> DEL ORIGEN AL DESTINO</span><h2>Un recorrido.<br/><em>Muchas historias.</em></h2></div><p>Cuatro momentos conectados por un mismo propósito: que el camino del café pueda contarse con claridad.</p></div><div className="journey-grid">{journey.map(item=>{const Icon=iconMap[item.icon];return <div className="journey-step" key={item.number}><span className="journey-step-number">{item.number}<span className="journey-line"/></span><div className="journey-icon"><Icon size={27}/></div><span className="journey-subtitle">{item.subtitle}</span><h3>{item.title}</h3><p>{item.text}</p></div>})}</div><div className="journey-bottom"><span><MapPinned size={19}/> Cauca, Huila y Tolima → Buenaventura</span><span>Ruta conceptual del piloto <ArrowDownRight size={16}/></span></div></div></section>
+      <section id="experiencias" className="experiences-section section-padding"><div className="container"><div className="experience-header"><div><span className="eyebrow eyebrow--dark"><span className="eyebrow-dot"/> DISEÑADO PARA CADA PERSONA</span><h2>Una plataforma.<br/><em>Tres experiencias.</em></h2></div><p>El mismo ecosistema, con herramientas distintas para quien cultiva, transporta y quiere conocer la procedencia de su café.</p></div><div className="experience-grid">{modules.map((item,i)=><article className={`experience-card experience-card--${item.slug}`} key={item.slug}><div className="experience-top"><span>{item.index} / {item.eyebrow}</span><Link href={`https://github.com/aromapacifico-devops/aromapacifico-devops-docs/blob/main/docs/design/${item.pdf}`} target="_blank" rel="noopener noreferrer" aria-label={`Ver prototipo ${item.slug}`}><ArrowUpRight size={20}/></Link></div><div className="experience-graphic" aria-hidden="true">{i===0?<FarmerPreview/>:i===1?<CarrierPreview/>:<BuyerPreview/>}</div><div className="experience-body"><h3>{item.title}</h3><p>{item.description}</p><div>{item.tags.map(t=><span className="mini-tag" key={t}>{t}</span>)}</div></div></article>)}</div><p className="experience-note">Interfaces ilustrativas basadas en los diseños del proyecto. Los prototipos y flujos están documentados; no son aplicaciones operativas conectadas.</p></div></section>
+      <section className="drone-section"><div className="container drone-inner"><div className="drone-symbol"><Wind size={40}/><span>05 SERVICIOS EN EL DISEÑO</span></div><div className="drone-content"><span className="eyebrow eyebrow--light"><span className="eyebrow-dot"/> INTELIGENCIA PARA EL CAMPO</span><h2>Una mirada distinta<br/>sobre <em>la cosecha.</em></h2><p>El diseño también contempla misiones de dron para delimitar áreas, confirmar focos, apoyar fumigaciones autorizadas, verificar resultados y estimar cosechas.</p><Link href={site.github} className="button button-outline-light" target="_blank" rel="noopener noreferrer">Conocer el diseño técnico <ArrowUpRight size={18}/></Link></div><div className="drone-orbit" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="orbit orbit-three"/><span className="orbit-point orbit-point-1"/><span className="orbit-point orbit-point-2"/><span className="orbit-point orbit-point-3"/><div className="drone-center"><Leaf size={55}/></div></div></div></section>
+      <TraceDemo />
+      <section className="closing-section"><div className="container closing-inner"><div><span className="eyebrow eyebrow--dark"><span className="eyebrow-dot"/> DISEÑO PARA UN CAFÉ CON FUTURO</span><h2>Lo que tiene origen,<br/><em>tiene historia.</em></h2><p>AromaPacífico nace como una propuesta académica de arquitectura digital para conectar territorio, confianza y tecnología.</p></div><div className="closing-actions"><Link href={site.figma} target="_blank" rel="noopener noreferrer" className="button button-primary">Explorar el diseño en Figma <ArrowUpRight size={19}/></Link><Link href={site.github} target="_blank" rel="noopener noreferrer" className="closing-sub-link">Consultar la documentación <ArrowRight size={17}/></Link></div></div></section>
+      <footer className="site-footer"><div className="container"><div className="footer-top"><div><Logo inverse/><p>El origen que nos conecta.</p></div><div className="footer-links"><Link href="#plataforma">Plataforma</Link><Link href="#recorrido">Recorrido</Link><Link href="#experiencias">Experiencias</Link><Link href={site.github} target="_blank" rel="noopener noreferrer">Documentación <ArrowUpRight size={14}/></Link></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} AromaPacífico · Proyecto académico</span><span>Diseñado para el territorio, desarrollado con propósito.</span><span>Prototipo · Sin servicios en producción</span></div></div></footer>
+    </main>
+  );
+}
+
+function FarmerPreview(){return <div className="phone-preview phone-preview--farmer"><div className="phone-speaker"/><div className="phone-content"><div className="preview-status"><span>Mi finca</span><span>●●●</span></div><div className="preview-greeting">Buen día,<br/><strong>tu cultivo primero.</strong></div><div className="preview-soft-card"><span>HUMEDAD DEL SUELO</span><div><Droplets size={17}/><strong>67%</strong></div><small>Valor ilustrativo</small><div className="preview-progress"><i/></div></div><div className="preview-soft-row"><span><Leaf size={15}/> Cultivo</span><span><Coffee size={15}/> Secado</span></div></div></div>}
+function CarrierPreview(){return <div className="phone-preview phone-preview--carrier"><div className="phone-speaker"/><div className="phone-content"><div className="preview-status"><span>Mi ruta</span><span>●●●</span></div><div className="preview-greeting">Un paso más<br/><strong>en el camino.</strong></div><div className="preview-soft-card"><span>RECORRIDO DE EJEMPLO</span><div><Truck size={17}/><strong>En camino</strong></div><small>Cauca → Centro de acopio</small></div><div className="preview-offline"><CloudOff size={14}/> Se enviará cuando haya conexión</div></div></div>}
+function BuyerPreview(){return <div className="phone-preview phone-preview--buyer"><div className="phone-speaker"/><div className="phone-content"><div className="preview-status"><span>Origen</span><span>●●●</span></div><div className="preview-greeting">Descubre<br/><strong>de dónde viene.</strong></div><div className="preview-soft-card"><span>CÓDIGO DE EJEMPLO</span><div><Check size={18}/><strong>Entregado</strong></div><small>Origen: Cauca, Colombia</small></div><div className="preview-soft-row"><span><CircleDot size={15}/> Registro</span><span><Waves size={15}/> Destino</span></div></div></div>}
