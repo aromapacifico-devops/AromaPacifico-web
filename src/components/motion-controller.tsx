@@ -9,12 +9,75 @@ function viewportProgress(element: HTMLElement, viewportHeight: number) {
   return clamp((viewportHeight * 0.86 - rect.top) / (rect.height + viewportHeight * 0.46));
 }
 
+function setJourneyCurrent(target: HTMLElement, current: number) {
+  if (target.dataset.activeStage === String(current)) return;
+  target.dataset.activeStage = String(current);
+  const nodes = Array.from(target.querySelectorAll<HTMLElement>("[data-journey-node]"));
+  const announcement = nodes[current]?.dataset.stageAnnouncement ?? "";
+  const output = target.querySelector<HTMLOutputElement>("[data-journey-output]");
+  const index = target.querySelector<HTMLElement>("[data-journey-index]");
+  if (output) output.textContent = announcement;
+  if (index) index.textContent = String(current + 1).padStart(2, "0");
+}
+
+function updateJourney(target: HTMLElement, progress: number, desktop: boolean, viewportHeight: number) {
+  const steps = Array.from(target.querySelectorAll<HTMLElement>("[data-journey-step]"));
+  const nodes = Array.from(target.querySelectorAll<HTMLElement>("[data-journey-node]"));
+  const visuals = Array.from(target.querySelectorAll<HTMLElement>("[data-journey-visual]"));
+  let current = 0;
+
+  if (desktop) {
+    const activeFloat = progress * Math.max(steps.length - 1, 1);
+    current = Math.round(activeFloat);
+    steps.forEach((step, index) => {
+      const offset = index - activeFloat;
+      const presence = clamp(1 - Math.abs(offset));
+      step.style.setProperty("--stage-opacity", presence.toFixed(4));
+      step.style.setProperty("--stage-x", `${Math.max(-1, Math.min(1, offset)) * 118}px`);
+      step.style.setProperty("--stage-y", `${(1 - presence) * 30}px`);
+      step.style.setProperty("--stage-scale", (0.9 + presence * 0.1).toFixed(4));
+    });
+    visuals.forEach((visual, index) => {
+      const offset = index - activeFloat;
+      const presence = clamp(1 - Math.abs(offset));
+      visual.style.setProperty("--stage-opacity", presence.toFixed(4));
+      visual.style.setProperty("--stage-x", `${Math.max(-1, Math.min(1, offset)) * 86}px`);
+      visual.style.setProperty("--stage-scale", (0.84 + presence * 0.16).toFixed(4));
+    });
+    nodes.forEach((node, index) => node.toggleAttribute("data-complete", index <= activeFloat + 0.01));
+  } else {
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    steps.forEach((step) => {
+      const rect = step.getBoundingClientRect();
+      const distance = Math.abs(rect.top + rect.height / 2 - viewportHeight * 0.52);
+      const presence = clamp(1 - distance / (viewportHeight * 0.68));
+      step.style.setProperty("--stage-opacity", (0.42 + presence * 0.58).toFixed(4));
+      step.style.setProperty("--stage-x", "0px");
+      step.style.setProperty("--stage-y", `${(1 - presence) * 48}px`);
+      step.style.setProperty("--stage-scale", (0.94 + presence * 0.06).toFixed(4));
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        current = Number(step.dataset.stageIndex ?? 0);
+      }
+    });
+    nodes.forEach((node, index) => node.toggleAttribute("data-complete", index <= current));
+  }
+
+  steps.forEach((step, index) => step.toggleAttribute("data-current", index === current));
+  visuals.forEach((visual, index) => visual.toggleAttribute("data-current", index === current));
+  nodes.forEach((node, index) => {
+    if (index === current) node.setAttribute("aria-current", "step");
+    else node.removeAttribute("aria-current");
+  });
+  setJourneyCurrent(target, current);
+}
+
 export function MotionController() {
   useEffect(() => {
     const root = document.documentElement;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const slowUpdate = window.matchMedia("(update: slow)");
-    const mobile = window.matchMedia("(max-width: 720px)");
+    const desktop = window.matchMedia("(min-width: 901px)");
     const revealTargets = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     const progressTargets = Array.from(document.querySelectorAll<HTMLElement>("[data-scroll-progress]"));
     const diagramCards = Array.from(document.querySelectorAll<HTMLElement>("[data-diagram-scroll]"));
@@ -32,7 +95,7 @@ export function MotionController() {
           word.style.setProperty("--word-progress", "1"),
         );
         target.querySelectorAll<HTMLElement>("[data-journey-step]").forEach((step) =>
-          step.style.setProperty("--step-progress", "1"),
+          step.style.setProperty("--stage-opacity", "1"),
         );
       });
       diagramCards.forEach((card) => card.style.setProperty("--diagram-progress", "1"));
@@ -95,8 +158,12 @@ export function MotionController() {
         if (!name) return;
         const rect = target.getBoundingClientRect();
         const progress = name === "hero"
-          ? clamp(-rect.top / Math.max(rect.height * 0.82, 1))
-          : viewportProgress(target, viewportHeight);
+          ? clamp(-rect.top / Math.max(rect.height * 0.72, 1))
+          : name === "journey" && desktop.matches
+            ? clamp(-rect.top / Math.max(rect.height - viewportHeight, 1))
+            : name === "journey"
+              ? clamp((viewportHeight * 0.56 - rect.top) / Math.max(rect.height - viewportHeight * 0.35, 1))
+              : viewportProgress(target, viewportHeight);
 
         target.style.setProperty(`--${name}-progress`, progress.toFixed(4));
 
@@ -107,20 +174,28 @@ export function MotionController() {
           });
         }
 
-        if (name === "stack" && !mobile.matches) {
-          const cards = target.querySelectorAll<HTMLElement>("[data-stack-card]");
+        if (name === "stack" && desktop.matches) {
+          const cards = Array.from(target.querySelectorAll<HTMLElement>("[data-stack-card]"));
+          const activeFloat = progress * Math.max(cards.length - 1, 1);
+          const current = Math.round(activeFloat);
           cards.forEach((card, index) => {
-            const cardProgress = clamp(progress * cards.length - index + 0.72);
-            card.style.setProperty("--stack-progress", cardProgress.toFixed(4));
+            const arrival = clamp(progress * cards.length - index + 0.6);
+            const depth = clamp(activeFloat - index);
+            card.style.setProperty("--stack-arrival", arrival.toFixed(4));
+            card.style.setProperty("--stack-depth", depth.toFixed(4));
+            card.toggleAttribute("data-stack-current", index === current);
           });
         }
 
         if (name === "journey") {
-          const steps = target.querySelectorAll<HTMLElement>("[data-journey-step]");
-          steps.forEach((step, index) => {
-            const stepProgress = clamp(progress * steps.length - index + 0.55);
-            step.style.setProperty("--step-progress", stepProgress.toFixed(4));
-            step.toggleAttribute("data-active", stepProgress > 0.5);
+          updateJourney(target, progress, desktop.matches, viewportHeight);
+        }
+
+        if (name === "metrics") {
+          target.querySelectorAll<HTMLElement>(".metric-card").forEach((card) => {
+            const cardRect = card.getBoundingClientRect();
+            const cardProgress = clamp((viewportHeight * 0.88 - cardRect.top) / (viewportHeight * 0.42));
+            card.style.setProperty("--metric-card-progress", cardProgress.toFixed(4));
           });
         }
       });
