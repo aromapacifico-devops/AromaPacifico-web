@@ -126,7 +126,7 @@ test("hero, pilares, diagramas y métricas cambian visualmente con el scroll", a
 test("reduced motion conserva todo el contenido sin escena sticky", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toHaveClass(/motion-static/);
   await expect(page.locator("[data-journey-step]")).toHaveCount(5);
   const states = await page.locator("[data-journey-step]").evaluateAll((steps) => steps.map((step) => ({
