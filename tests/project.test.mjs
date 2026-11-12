@@ -74,10 +74,46 @@ test("el movimiento respeta reduced motion y evita ocultar contenido sin JavaScr
   const css = read("src/app/globals.css");
   const controller = read("src/components/motion-controller.tsx");
   assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /update:slow/);
   assert.match(css, /\.motion-ready \[data-reveal\]/);
   assert.match(controller, /prefers-reduced-motion: reduce/);
   assert.match(controller, /IntersectionObserver/);
+  assert.match(controller, /requestAnimationFrame\(update\)/);
+  assert.match(controller, /addEventListener\("scroll", scheduleUpdate, \{ passive: true \}\)/);
+  assert.doesNotMatch(controller, /setState|useState/);
   assert.doesNotMatch(css, /(^|\n)\[data-reveal\]\{opacity:0/);
+});
+
+test("el storytelling de scroll conserva semántica y progresión local", () => {
+  const page = read("src/app/page.tsx");
+  const css = read("src/app/globals.css");
+  for (const progress of ["hero", "text", "stack", "journey", "drone", "metrics"]) {
+    assert.match(page, new RegExp(`data-scroll-progress="${progress}"`));
+  }
+  assert.match(page, /data-scroll-word/);
+  assert.match(page, /data-stack-card/);
+  assert.match(page, /journey-path-progress/);
+  assert.match(page, /pathLength="1"/);
+  assert.match(css, /position:sticky/);
+  assert.match(css, /stroke-dashoffset:calc\(1 - var\(--journey-progress/);
+});
+
+test("las métricas son cifras documentadas y se etiquetan como estimaciones", () => {
+  const content = read("src/content/site.ts");
+  const page = read("src/app/page.tsx");
+  for (const value of ["60", "8500", "108000"]) {
+    assert.match(content, new RegExp(`value: ${value}`));
+  }
+  assert.match(content, /inference-functions\.md#2-context-and-volumes/);
+  assert.match(page, /ESTIMACIÓN DE DISEÑO/);
+  assert.match(page, /No son métricas operacionales/);
+  assert.match(page, /data-counter/);
+});
+
+test("las tarjetas de diagramas usan progreso y el visor mantiene sus controles", () => {
+  assert.match(read("src/components/architecture/diagram-card.tsx"), /data-diagram-scroll/);
+  assert.match(read("src/components/architecture/architecture-section.tsx"), /data-scroll-progress="architecture"/);
+  assert.match(read("src/components/architecture/diagram-viewer.tsx"), /data-viewer-enter/);
 });
 
 test("el branding oficial y los colores institucionales están integrados", () => {
