@@ -89,6 +89,33 @@ export const journey = [
   },
 ] as const;
 
+const inferenceVolumeSource =
+  "https://github.com/aromapacifico-devops/aromapacifico-devops-docs/blob/main/docs/architecture/inference-functions.md#2-context-and-volumes";
+
+export const designMetrics = [
+  {
+    value: 60,
+    suffix: "misiones",
+    title: "Confirmación de focos",
+    description: "Misiones de confirmación previstas para un mes de cosecha.",
+    source: inferenceVolumeSource,
+  },
+  {
+    value: 8500,
+    suffix: "imágenes",
+    title: "Funciones de visión",
+    description: "Imágenes que procesarían las tres funciones de visión en un mes de cosecha.",
+    source: inferenceVolumeSource,
+  },
+  {
+    value: 108000,
+    suffix: "lecturas",
+    title: "Telemetría de cosecha",
+    description: "Lecturas de cultivo y secado consideradas en el volumen mensual de referencia.",
+    source: inferenceVolumeSource,
+  },
+] as const;
+
 export type Diagram = {
   number: string;
   title: string;

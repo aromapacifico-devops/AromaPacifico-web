@@ -20,7 +20,7 @@ export function ArchitectureSection() {
   }, []);
 
   return (
-    <section id="arquitectura" className="architecture-section section-padding">
+    <section id="arquitectura" className="architecture-section section-padding" data-scroll-progress="architecture">
       <div className="container">
         <div className="architecture-heading" data-reveal="heading">
           <div>

@@ -117,6 +117,7 @@ export function DiagramViewer({ diagram, onClose }: DiagramViewerProps) {
       <div
         ref={dialogRef}
         className="diagram-viewer"
+        data-viewer-enter
         role="dialog"
         aria-modal="true"
         aria-labelledby="viewer-title"

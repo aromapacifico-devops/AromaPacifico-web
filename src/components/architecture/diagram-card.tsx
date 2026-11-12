@@ -13,6 +13,7 @@ export function DiagramCard({ diagram, onOpen, delay }: DiagramCardProps) {
     <article
       className="diagram-card"
       data-reveal="card"
+      data-diagram-scroll
       style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}
     >
       <div className="diagram-preview">
