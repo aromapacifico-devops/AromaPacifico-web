@@ -52,8 +52,9 @@ test("los metadatos de diagramas son completos, únicos y trazables", () => {
 test("la navegación enlaza las secciones implementadas", () => {
   const page = read("src/app/page.tsx");
   const header = read("src/components/header.tsx");
+  const sections = `${page}\n${read("src/components/journey-section.tsx")}\n${read("src/components/architecture/architecture-section.tsx")}\n${read("src/components/trace-demo.tsx")}`;
   for (const id of ["plataforma", "recorrido", "arquitectura", "experiencias", "consulta"]) {
-    assert.match(`${page}\n${read("src/components/architecture/architecture-section.tsx")}\n${read("src/components/trace-demo.tsx")}`, new RegExp(`id="${id}"`));
+    assert.match(sections, new RegExp(`id="${id}"`));
     assert.match(`${header}\n${page}`, new RegExp(`#${id}`));
   }
   assert.match(header, /aria-current/);
@@ -86,16 +87,22 @@ test("el movimiento respeta reduced motion y evita ocultar contenido sin JavaScr
 
 test("el storytelling de scroll conserva semántica y progresión local", () => {
   const page = read("src/app/page.tsx");
+  const journey = read("src/components/journey-section.tsx");
+  const markup = `${page}\n${journey}`;
   const css = read("src/app/globals.css");
   for (const progress of ["hero", "text", "stack", "journey", "drone", "metrics"]) {
-    assert.match(page, new RegExp(`data-scroll-progress="${progress}"`));
+    assert.match(markup, new RegExp(`data-scroll-progress="${progress}"`));
   }
   assert.match(page, /data-scroll-word/);
   assert.match(page, /data-stack-card/);
-  assert.match(page, /journey-path-progress/);
-  assert.match(page, /pathLength="1"/);
+  assert.equal((journey.match(/data-journey-step/g) ?? []).length, 1);
+  assert.match(journey, /data-journey-node/);
+  assert.match(journey, /aria-current/);
+  assert.doesNotMatch(journey, /<svg|journey-path/);
   assert.match(css, /position:sticky/);
-  assert.match(css, /stroke-dashoffset:calc\(1 - var\(--journey-progress/);
+  assert.match(css, /min-height:500svh/);
+  assert.match(css, /journey-rail-progress/);
+  assert.match(css, /scaleX\(var\(--journey-progress/);
 });
 
 test("las métricas son cifras documentadas y se etiquetan como estimaciones", () => {
