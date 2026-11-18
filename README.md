@@ -23,13 +23,13 @@ Captura auténtica de la exportación estática ejecutada localmente. También s
 - Identidad oficial con Outfit, Roboto Mono y la paleta institucional.
 - Hero editorial con parallax progresivo, cambio de escala y transición hacia la siguiente sección.
 - Storytelling ligado al desplazamiento con variables CSS, un listener pasivo y `requestAnimationFrame`.
-- Revelado textual por frases, tarjetas apilables y recorrido SVG que avanza con el scroll.
+- Revelado textual por frases, tarjetas apilables y conexión lineal alineada que avanza con el scroll sin cruzar títulos.
 - Métricas de planificación documentadas, diferenciadas de cualquier dato operacional.
 - Recorrido visual finca → transporte → centro de acopio → puerto → comprador.
 - Tres experiencias claramente etiquetadas como prototipos de interfaz.
 - Consulta de saco con carga ilustrativa, validación y resultado ficticio.
-- Galería de cuatro diagramas oficiales almacenados localmente.
-- Visor modal con zoom, restablecimiento, ajuste, paneo, teclado y gestos táctiles.
+- Galería de cuatro diagramas oficiales almacenados localmente, con previews WebP optimizadas y carga diferida.
+- Visor técnico fullscreen con zoom anclado, rueda, pinch, paneo acotado, navegación entre diagramas y estados de carga/error.
 - Navegación sticky, estado de sección, menú móvil y cierre con `Escape`.
 - Exportación estática, metadatos SEO y soporte para `prefers-reduced-motion`.
 
@@ -62,10 +62,16 @@ Las entradas no se repiten. `prefers-reduced-motion` y `update: slow` desactivan
 Cada tarjeta abre una copia local del diagrama en un visor accesible. Controles disponibles:
 
 - acercar, alejar, escala 100 % y ajustar a pantalla;
-- arrastrar con puntero o usar flechas del teclado;
-- `+`, `-`, `0` y `F` como atajos;
+- ampliar con rueda alrededor del cursor o con gesto pinch en una pantalla táctil;
+- arrastrar con puntero o usar flechas del teclado, con límites que evitan perder el contenido;
+- diagrama anterior, siguiente y contador de posición;
+- `+`, `-`, `0` para ajustar y `1` para escala real;
 - cerrar con botón, fondo o `Escape`;
-- foco inicial, ciclo de foco y devolución del foco al disparador.
+- foco inicial, ciclo de foco, aislamiento del contenido de fondo y devolución del foco al disparador;
+- restauración exacta del scroll y del estado del `body` al cerrar;
+- estado de carga, recuperación de errores y descripción técnica visible.
+
+Las tarjetas no contienen navegación externa. La procedencia se conserva como metadato y se documenta en este README, mientras toda la exploración ocurre dentro de AromaPacífico Web.
 
 ## Stack tecnológico
 
@@ -106,7 +112,7 @@ Abre <http://localhost:3000>.
 | `npm run typecheck` | Verificación de TypeScript sin emitir archivos |
 | `npm run lint` | Reglas de ESLint y Next.js |
 | `npm run test` | Pruebas con Node Test Runner |
-| `npm run test:visual` | QA de integración con Playwright en cinco breakpoints |
+| `npm run test:visual` | QA de integración con Playwright en seis breakpoints y generación de evidencia |
 | `npm run build` | Compilación y exportación estática en `out/` |
 | `npm run start` | Servidor Next.js; no es necesario para el artefacto estático |
 
@@ -129,11 +135,13 @@ src/
 │   └── trace-demo.tsx
 └── content/site.ts                 Contenido y metadatos tipados
 public/
-├── architecture/                   Cuatro diagramas oficiales locales
+├── architecture/                   Originales PNG y previews WebP locales
 ├── brand/                           Logotipo oficial
 ├── fonts/                           Outfit y Roboto Mono autoalojadas
 └── illustrations/                  Ilustración del hero
-tests/project.test.mjs              Integridad, rutas y accesibilidad estática
+tests/
+├── project.test.mjs                Integridad, rutas y accesibilidad estática
+└── visual/                         Storytelling, visor y evidencia en Chromium
 ```
 
 ## Arquitectura del frontend
@@ -151,7 +159,7 @@ Las copias de `public/architecture/` proceden de [`docs/architecture/diagrams/`]
 | `19-inference-functions.drawio.png` | [Funciones de inferencia](https://github.com/aromapacifico-devops/aromapacifico-devops-docs/blob/main/docs/architecture/diagrams/19-inference-functions.drawio.png) |
 | `21-flight-object-transport.drawio.png` | [Transporte de objetos de vuelo](https://github.com/aromapacifico-devops/aromapacifico-devops-docs/blob/main/docs/architecture/diagrams/21-flight-object-transport.drawio.png) |
 
-No se alteraron las decisiones arquitectónicas ni se cargan imágenes remotas durante la visita.
+No se alteraron las decisiones arquitectónicas ni se cargan imágenes remotas durante la visita. Cada PNG conserva una miniatura `.preview.webp`; la galería carga las miniaturas y el visor solicita únicamente el original seleccionado.
 
 ## Branding y design system
 
@@ -182,7 +190,9 @@ npx playwright install chromium
 npm run test:visual
 ```
 
-La suite visual comprueba cinco estados diferenciados del recorrido, etapa activa, transformaciones efectivas, geometría de las conexiones, ausencia de cruces con texto, overflow, breakpoints de 360 a 1440 px y movimiento reducido.
+La suite visual comprueba cinco estados diferenciados del recorrido, etapa activa, transformaciones efectivas, geometría de las conexiones, ausencia de cruces con texto, overflow, breakpoints de 360 a 1920 px y movimiento reducido. También valida los cuatro disparadores del visor, origen local de imágenes, zoom por controles y rueda, pan, navegación, Escape, restauración de foco y scroll, bloqueo del fondo y controles móviles.
+
+Las capturas verificadas se generan desde la exportación estática: [hero](public/screenshots/qa-hero.png), [plataforma](public/screenshots/qa-platform.png), [recorrido 1](public/screenshots/qa-journey-scene-1.png), [recorrido 3](public/screenshots/qa-journey-scene-3.png), [recorrido 5](public/screenshots/qa-journey-scene-5.png), [galería](public/screenshots/qa-architecture-gallery.png), [visor](public/screenshots/qa-diagram-viewer.png), [zoom](public/screenshots/qa-diagram-zoom.png), [móvil](public/screenshots/qa-mobile-390.png) y [footer](public/screenshots/qa-footer.png).
 
 ## CI/CD
 
@@ -209,6 +219,7 @@ No se necesitan secretos. Nunca añadas credenciales de AWS a este repositorio.
 - Las pantallas de experiencia son representaciones CSS, no aplicaciones funcionales.
 - Sin `NEXT_PUBLIC_SITE_URL`, Open Graph usa como respaldo el logotipo del repositorio oficial de documentación; con la variable definida usa la captura local.
 - El alcance de infraestructura permanece en `terraform plan`.
+- Next.js 16.4.2 emite un aviso de vulnerabilidad conocida durante `next build`; debe planificarse la actualización de seguridad y volver a ejecutar toda la suite antes de publicar.
 
 ## Roadmap
 
