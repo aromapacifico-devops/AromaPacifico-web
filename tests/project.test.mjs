@@ -37,6 +37,18 @@ test("los cuatro diagramas oficiales existen localmente y son PNG válidos", () 
   }
 });
 
+test("la galería usa previews optimizadas y conserva los originales para el visor", () => {
+  const cards = read("src/components/architecture/diagram-card.tsx");
+  assert.match(cards, /diagram\.previewSrc/);
+  assert.doesNotMatch(cards, /target="_blank"|diagram\.source/);
+  for (const name of diagramFiles) {
+    const preview = name.replace(".drawio.png", ".preview.webp");
+    const file = path.join(root, "public", "architecture", preview);
+    assert.ok(fs.existsSync(file), preview);
+    assert.ok(fs.statSync(file).size < fs.statSync(path.join(root, "public", "architecture", name)).size, preview);
+  }
+});
+
 test("los metadatos de diagramas son completos, únicos y trazables", () => {
   const content = read("src/content/site.ts");
   assert.match(content, /docs\/architecture\/diagrams/);
@@ -69,6 +81,12 @@ test("el visor expone controles accesibles y gestión de teclado", () => {
   }
   assert.match(viewer, /event\.key === "Tab"/);
   assert.match(viewer, /setPointerCapture/);
+  assert.match(viewer, /Diagrama anterior/);
+  assert.match(viewer, /Diagrama siguiente/);
+  assert.match(viewer, /onWheel/);
+  assert.match(viewer, /pinchRef/);
+  assert.match(viewer, /createPortal/);
+  assert.match(viewer, /setAttribute\("inert"/);
 });
 
 test("el movimiento respeta reduced motion y evita ocultar contenido sin JavaScript", () => {

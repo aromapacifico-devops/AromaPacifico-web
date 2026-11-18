@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const moments = [0, 0.25, 0.5, 0.75, 1] as const;
-const widths = [360, 390, 768, 1024, 1440] as const;
+const widths = [360, 390, 768, 1024, 1440, 1920] as const;
 
 test("el recorrido produce cinco escenas distintas y la conexión une los nodos", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
