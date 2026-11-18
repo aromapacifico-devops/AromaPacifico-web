@@ -8,3 +8,5 @@ build/
 .DS_Store
 .vercel/
 coverage/
+playwright-report/
+test-results/

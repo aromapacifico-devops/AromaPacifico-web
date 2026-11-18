@@ -1,30 +1,155 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
-const root = path.resolve(import.meta.dirname, '..');
-const read = (f) => fs.readFileSync(path.join(root,f), 'utf8');
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 
-test('La demostración es identificada como ficticia', () => {
-  const code = read('src/components/trace-demo.tsx');
-  assert.match(code, /DEMO · DATOS FICTICIOS/);
-  assert.match(code, /no está conectada a datos reales/);
-  assert.match(code, /No representan sacos, fincas ni movimientos reales/);
-});
-test('No existen llamadas de la página a endpoints de AWS o APIs reales', () => {
-  for (const file of ['src/app/page.tsx','src/components/trace-demo.tsx','src/content/site.ts']){
+const root = path.resolve(import.meta.dirname, "..");
+const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+const exists = (file) => fs.existsSync(path.join(root, file));
+
+const diagramFiles = [
+  "01-end-to-end.drawio.png",
+  "03-connectivity-and-centers.drawio.png",
+  "19-inference-functions.drawio.png",
+  "21-flight-object-transport.drawio.png",
+];
+
+test("la demostración se identifica como ficticia y no consume APIs", () => {
+  const demo = read("src/components/trace-demo.tsx");
+  assert.match(demo, /DEMO · DATOS FICTICIOS/);
+  assert.match(demo, /no está conectada a datos reales/);
+  assert.match(demo, /No representan sacos, fincas ni movimientos reales/);
+  assert.match(demo, /No se está consultando ningún servicio externo/);
+
+  for (const file of ["src/app/page.tsx", "src/components/trace-demo.tsx", "src/content/site.ts"]) {
     const content = read(file);
-    assert.doesNotMatch(content,/fetch\(|axios\.|amazonaws\.com|process\.env\.AWS_/);
+    assert.doesNotMatch(content, /fetch\(|axios\.|amazonaws\.com|process\.env\.AWS_/);
   }
 });
-test('Secciones principales y branding', () => {
-  const page = read('src/app/page.tsx');
-  for (const id of ['plataforma','recorrido','experiencias']) assert.match(page,new RegExp(`id="${id}"`));
-  assert.match(read('src/components/trace-demo.tsx'),/id="consulta"/);
-  const css = read('src/app/globals.css');
-  for (const color of ['#8C0303','#0378A6','#F29F05','#FBF9F5']) assert.ok(css.toLowerCase().includes(color.toLowerCase()), color);
+
+test("los cuatro diagramas oficiales existen localmente y son PNG válidos", () => {
+  for (const name of diagramFiles) {
+    const file = path.join(root, "public", "architecture", name);
+    assert.ok(fs.existsSync(file), name);
+    const signature = fs.readFileSync(file).subarray(0, 8).toString("hex");
+    assert.equal(signature, "89504e470d0a1a0a", `${name} no tiene firma PNG`);
+    assert.ok(fs.statSync(file).size > 50_000, `${name} parece incompleto`);
+  }
 });
-test('Proyecto exportable sin backend', () => {
-  const config = read('next.config.ts');
-  assert.match(config,/output: "export"/);
+
+test("la galería usa previews optimizadas y conserva los originales para el visor", () => {
+  const cards = read("src/components/architecture/diagram-card.tsx");
+  assert.match(cards, /diagram\.previewSrc/);
+  assert.doesNotMatch(cards, /target="_blank"|diagram\.source/);
+  for (const name of diagramFiles) {
+    const preview = name.replace(".drawio.png", ".preview.webp");
+    const file = path.join(root, "public", "architecture", preview);
+    assert.ok(fs.existsSync(file), preview);
+    assert.ok(fs.statSync(file).size < fs.statSync(path.join(root, "public", "architecture", name)).size, preview);
+  }
+});
+
+test("los metadatos de diagramas son completos, únicos y trazables", () => {
+  const content = read("src/content/site.ts");
+  assert.match(content, /docs\/architecture\/diagrams/);
+  for (const name of diagramFiles) {
+    assert.match(content, new RegExp(`/architecture/${name.replaceAll(".", "\\.")}`));
+    assert.ok(content.includes(`source: \`\${diagramBase}/${name}\``), name);
+  }
+  const diagramContent = content.slice(content.indexOf("export const diagrams"));
+  const numbers = [...diagramContent.matchAll(/number: "(01|03|19|21)"/g)].map((match) => match[1]);
+  assert.deepEqual(numbers, ["01", "03", "19", "21"]);
+});
+
+test("la navegación enlaza las secciones implementadas", () => {
+  const page = read("src/app/page.tsx");
+  const header = read("src/components/header.tsx");
+  const sections = `${page}\n${read("src/components/journey-section.tsx")}\n${read("src/components/architecture/architecture-section.tsx")}\n${read("src/components/trace-demo.tsx")}`;
+  for (const id of ["plataforma", "recorrido", "arquitectura", "experiencias", "consulta"]) {
+    assert.match(sections, new RegExp(`id="${id}"`));
+    assert.match(`${header}\n${page}`, new RegExp(`#${id}`));
+  }
+  assert.match(header, /aria-current/);
+  assert.match(header, /aria-expanded/);
+  assert.match(page, /Saltar al contenido/);
+});
+
+test("el visor expone controles accesibles y gestión de teclado", () => {
+  const viewer = read("src/components/architecture/diagram-viewer.tsx");
+  for (const token of ["aria-modal=\"true\"", "role=\"dialog\"", "Escape", "Cerrar visor", "Ajustar", "Acercar", "Alejar"]) {
+    assert.ok(viewer.includes(token), token);
+  }
+  assert.match(viewer, /event\.key === "Tab"/);
+  assert.match(viewer, /setPointerCapture/);
+  assert.match(viewer, /Diagrama anterior/);
+  assert.match(viewer, /Diagrama siguiente/);
+  assert.match(viewer, /onWheel/);
+  assert.match(viewer, /pinchRef/);
+  assert.match(viewer, /createPortal/);
+  assert.match(viewer, /setAttribute\("inert"/);
+});
+
+test("el movimiento respeta reduced motion y evita ocultar contenido sin JavaScript", () => {
+  const css = read("src/app/globals.css");
+  const controller = read("src/components/motion-controller.tsx");
+  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /update:slow/);
+  assert.match(css, /\.motion-ready \[data-reveal\]/);
+  assert.match(controller, /prefers-reduced-motion: reduce/);
+  assert.match(controller, /IntersectionObserver/);
+  assert.match(controller, /requestAnimationFrame\(update\)/);
+  assert.match(controller, /addEventListener\("scroll", scheduleUpdate, \{ passive: true \}\)/);
+  assert.doesNotMatch(controller, /setState|useState/);
+  assert.doesNotMatch(css, /(^|\n)\[data-reveal\]\{opacity:0/);
+});
+
+test("el storytelling de scroll conserva semántica y progresión local", () => {
+  const page = read("src/app/page.tsx");
+  const journey = read("src/components/journey-section.tsx");
+  const markup = `${page}\n${journey}`;
+  const css = read("src/app/globals.css");
+  for (const progress of ["hero", "text", "stack", "journey", "drone", "metrics"]) {
+    assert.match(markup, new RegExp(`data-scroll-progress="${progress}"`));
+  }
+  assert.match(page, /data-scroll-word/);
+  assert.match(page, /data-stack-card/);
+  assert.equal((journey.match(/data-journey-step/g) ?? []).length, 1);
+  assert.match(journey, /data-journey-node/);
+  assert.match(journey, /aria-current/);
+  assert.doesNotMatch(journey, /<svg|journey-path/);
+  assert.match(css, /position:sticky/);
+  assert.match(css, /min-height:500svh/);
+  assert.match(css, /journey-rail-progress/);
+  assert.match(css, /scaleX\(var\(--journey-progress/);
+});
+
+test("las métricas son cifras documentadas y se etiquetan como estimaciones", () => {
+  const content = read("src/content/site.ts");
+  const page = read("src/app/page.tsx");
+  for (const value of ["60", "8500", "108000"]) {
+    assert.match(content, new RegExp(`value: ${value}`));
+  }
+  assert.match(content, /inference-functions\.md#2-context-and-volumes/);
+  assert.match(page, /ESTIMACIÓN DE DISEÑO/);
+  assert.match(page, /No son métricas operacionales/);
+  assert.match(page, /data-counter/);
+});
+
+test("las tarjetas de diagramas usan progreso y el visor mantiene sus controles", () => {
+  assert.match(read("src/components/architecture/diagram-card.tsx"), /data-diagram-scroll/);
+  assert.match(read("src/components/architecture/architecture-section.tsx"), /data-scroll-progress="architecture"/);
+  assert.match(read("src/components/architecture/diagram-viewer.tsx"), /data-viewer-enter/);
+});
+
+test("el branding oficial y los colores institucionales están integrados", () => {
+  assert.ok(exists("public/brand/aroma-pacifico-logo.png"));
+  assert.match(read("src/components/logo.tsx"), /aroma-pacifico-logo\.png/);
+  const css = read("src/app/globals.css");
+  for (const color of ["#8C0303", "#0378A6", "#F29F05", "#FBF9F5", "#161412"]) {
+    assert.ok(css.toLowerCase().includes(color.toLowerCase()), color);
+  }
+});
+
+test("el proyecto sigue siendo una exportación estática sin backend", () => {
+  assert.match(read("next.config.ts"), /output: "export"/);
 });
