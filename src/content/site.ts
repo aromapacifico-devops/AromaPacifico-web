@@ -119,8 +119,10 @@ export const designMetrics = [
 export type Diagram = {
   number: string;
   title: string;
+  category: string;
   description: string;
   src: string;
+  previewSrc: string;
   source: string;
   width: number;
   height: number;
@@ -132,40 +134,48 @@ const diagramBase =
 export const diagrams: readonly Diagram[] = [
   {
     number: "01",
-    title: "Flujo de extremo a extremo",
+    title: "Arquitectura integral",
+    category: "PLATAFORMA Y TRAZABILIDAD",
     description:
       "Relaciona fincas, transporte, centros, puerto y consulta pública con sus rutas, límites de confianza e identidades.",
     src: "/architecture/01-end-to-end.drawio.png",
+    previewSrc: "/architecture/01-end-to-end.preview.webp",
     source: `${diagramBase}/01-end-to-end.drawio.png`,
     width: 1824,
     height: 985,
   },
   {
     number: "03",
-    title: "Conectividad y centros",
+    title: "Conectividad del piloto",
+    category: "RED Y OPERACIÓN OFFLINE",
     description:
       "Explica cómo se conectaría cada sitio y cómo el diseño conserva operaciones cuando la señal no está disponible.",
     src: "/architecture/03-connectivity-and-centers.drawio.png",
+    previewSrc: "/architecture/03-connectivity-and-centers.preview.webp",
     source: `${diagramBase}/03-connectivity-and-centers.drawio.png`,
     width: 1824,
     height: 947,
   },
   {
     number: "19",
-    title: "Funciones de inferencia",
+    title: "Inferencia orientada a eventos",
+    category: "DRONES E INTELIGENCIA",
     description:
       "Describe el flujo propuesto, orientado a eventos, desde un registro de vuelo u objeto archivado hasta resultados de inferencia.",
     src: "/architecture/19-inference-functions.drawio.png",
+    previewSrc: "/architecture/19-inference-functions.preview.webp",
     source: `${diagramBase}/19-inference-functions.drawio.png`,
     width: 2175,
     height: 1093,
   },
   {
     number: "21",
-    title: "Transporte de objetos de vuelo",
+    title: "Transporte de evidencias de drones",
+    category: "OBJETOS DE VUELO",
     description:
       "Muestra dónde vivirían fotos, mapas, manifiestos y registros, y qué eventos llevarían cada objeto hasta su publicación.",
     src: "/architecture/21-flight-object-transport.drawio.png",
+    previewSrc: "/architecture/21-flight-object-transport.preview.webp",
     source: `${diagramBase}/21-flight-object-transport.drawio.png`,
     width: 1985,
     height: 863,

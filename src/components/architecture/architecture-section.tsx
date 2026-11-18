@@ -6,17 +6,21 @@ import { DiagramCard } from "./diagram-card";
 import { DiagramViewer } from "./diagram-viewer";
 
 export function ArchitectureSection() {
-  const [selected, setSelected] = useState<Diagram | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
   function openViewer(diagram: Diagram) {
     triggerRef.current = document.activeElement as HTMLElement;
-    setSelected(diagram);
+    setSelectedIndex(diagrams.indexOf(diagram));
   }
 
   const closeViewer = useCallback(() => {
-    setSelected(null);
+    setSelectedIndex(null);
     requestAnimationFrame(() => triggerRef.current?.focus());
+  }, []);
+
+  const navigateViewer = useCallback((direction: -1 | 1) => {
+    setSelectedIndex((current) => current === null ? null : (current + direction + diagrams.length) % diagrams.length);
   }, []);
 
   return (
@@ -39,7 +43,15 @@ export function ArchitectureSection() {
           ))}
         </div>
       </div>
-      {selected && <DiagramViewer diagram={selected} onClose={closeViewer} />}
+      {selectedIndex !== null && (
+        <DiagramViewer
+          diagram={diagrams[selectedIndex]}
+          currentIndex={selectedIndex}
+          total={diagrams.length}
+          onNavigate={navigateViewer}
+          onClose={closeViewer}
+        />
+      )}
     </section>
   );
 }

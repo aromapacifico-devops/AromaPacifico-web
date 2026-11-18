@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ArrowUpRight, Expand } from "lucide-react";
+import { Expand } from "lucide-react";
 import type { Diagram } from "@/content/site";
 
 type DiagramCardProps = {
@@ -18,24 +18,25 @@ export function DiagramCard({ diagram, onOpen, delay }: DiagramCardProps) {
     >
       <div className="diagram-preview">
         <Image
-          src={diagram.src}
+          src={diagram.previewSrc}
           width={diagram.width}
           height={diagram.height}
           sizes="(max-width: 720px) 100vw, 50vw"
           alt={`Vista previa del diagrama ${diagram.title}`}
+          loading="lazy"
         />
       </div>
       <div className="diagram-card-body">
-        <span className="diagram-number">DIAGRAMA {diagram.number}</span>
+        <div className="diagram-meta">
+          <span className="diagram-number">DIAGRAMA {diagram.number}</span>
+          <span>{diagram.category}</span>
+        </div>
         <h3>{diagram.title}</h3>
         <p>{diagram.description}</p>
         <div className="diagram-actions">
-          <button type="button" onClick={() => onOpen(diagram)}>
+          <button type="button" onClick={() => onOpen(diagram)} aria-label={`Explorar diagrama: ${diagram.title}`}>
             <Expand size={17} aria-hidden="true" /> Explorar diagrama
           </button>
-          <a href={diagram.source} target="_blank" rel="noopener noreferrer">
-            Fuente original <ArrowUpRight size={15} aria-hidden="true" />
-          </a>
         </div>
       </div>
     </article>
